@@ -1,5 +1,5 @@
 $:.unshift File.expand_path('../lib', __FILE__)
-require 'chronic'
+require 'chronic/version'
 
 Gem::Specification.new do |s|
   s.name = 'chronic'
@@ -10,11 +10,16 @@ Gem::Specification.new do |s|
   s.authors  = ['Tom Preston-Werner', 'Lee Jarvis']
   s.email    = ['tom@mojombo.com', 'ljjarvis@gmail.com']
   s.homepage = 'http://github.com/mojombo/chronic'
+  s.license = 'MIT'
   s.rdoc_options = ['--charset=UTF-8']
   s.extra_rdoc_files = %w[README.md HISTORY.md LICENSE]
-  s.files = `git ls-files`.split("\n")
-  s.test_files = `git ls-files -- test`.split("\n")
+  s.files = `git ls-files`.split($/)
+  s.test_files = `git ls-files -- test`.split($/)
 
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'minitest'
+  s.add_runtime_dependency 'numerizer', '~> 0.2'
+
+  s.add_development_dependency 'rake', '~> 10'
+  s.add_development_dependency 'simplecov', '~> 0'
+  s.add_development_dependency 'minitest', '~> 5.0'
+  s.add_development_dependency 'activesupport', '~> 4'
 end

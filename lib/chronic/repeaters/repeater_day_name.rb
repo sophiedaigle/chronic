@@ -2,8 +2,9 @@ module Chronic
   class RepeaterDayName < Repeater #:nodoc:
     DAY_SECONDS = 86400 # (24 * 60 * 60)
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_date = nil
     end
 
     def next(pointer)
@@ -11,8 +12,8 @@ module Chronic
 
       direction = pointer == :future ? 1 : -1
 
-      if !@current_date
-        @current_date = Date.new(@now.year, @now.month, @now.day)
+      unless @current_date
+        @current_date = ::Date.new(@now.year, @now.month, @now.day)
         @current_date += direction
 
         day_num = symbol_to_number(@type)
@@ -46,7 +47,7 @@ module Chronic
 
     def symbol_to_number(sym)
       lookup = {:sunday => 0, :monday => 1, :tuesday => 2, :wednesday => 3, :thursday => 4, :friday => 5, :saturday => 6}
-      lookup[sym] || raise("Invalid symbol specified")
+      lookup[sym] || raise('Invalid symbol specified')
     end
   end
 end

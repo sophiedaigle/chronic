@@ -8,6 +8,8 @@ module Chronic
     DEFAULT_OPTIONS = {
       :context => :future,
       :now => nil,
+      :hours24 => nil,
+      :week_start => :sunday,
       :guess => true,
       :ambiguous_time_range => 6,
       :endian_precedence    => [:middle, :little],
@@ -23,10 +25,16 @@ module Chronic
     #                   given, it will assume it is in the past.
     #        :now - Time, all computations will be based off of time
     #               instead of Time.now.
+    #        :hours24 - Time will be parsed as it would be 24 hour clock.
+    #        :week_start - By default, the parser assesses weeks start on
+    #                  sunday but you can change this value to :monday if
+    #                  needed.
     #        :guess - By default the parser will guess a single point in time
     #                 for the given date or time. If you'd rather have the
     #                 entire time span returned, set this to false
-    #                 and a Chronic::Span will be returned.
+    #                 and a Chronic::Span will be returned. Setting :guess to :end
+    #                 will return last time from Span, to :middle for middle (same as just true)
+    #                 and :begin for first time from span.
     #        :ambiguous_time_range - If an Integer is given, ambiguous times
     #                  (like 5:00) will be assumed to be within the range of
     #                  that time in the AM to that time in the PM. For
@@ -58,9 +66,7 @@ module Chronic
 
       puts "+#{'-' * 51}\n| #{tokens}\n+#{'-' * 51}" if Chronic.debug
 
-      if span
-        options[:guess] ? guess(span) : span
-      end
+      guess(span, options[:guess]) if span
     end
 
     # Clean up the specified text ready for parsing.
@@ -102,12 +108,11 @@ module Chronic
     # span - The Chronic::Span object to calcuate a guess from.
     #
     # Returns a new Time object.
-    def guess(span)
-      if span.width > 1
-        span.begin + (span.width / 2)
-      else
-        span.begin
-      end
+    def guess(span, mode = :middle)
+      return span if not mode
+      return span.begin + span.width / 2 if span.width > 1 and (mode == true or mode == :middle)
+      return span.end if mode == :end
+      span.begin
     end
 
     # List of Handler definitions. See Chronic.parse for a list of options this
@@ -117,78 +122,7 @@ module Chronic
     #
     # Returns a Hash of Handler definitions.
     def definitions(options = {})
-      options[:endian_precedence] ||= [:middle, :little]
-
-      @@definitions ||= {
-        :time => [
-          Handler.new([:repeater_time, :repeater_day_portion?], nil)
-        ],
-
-        :date => [
-          Handler.new([:repeater_day_name, :repeater_month_name, :scalar_day, :repeater_time, :separator_slash_or_dash?, :time_zone, :scalar_year], :handle_generic),
-          Handler.new([:repeater_day_name, :repeater_month_name, :scalar_day], :handle_rdn_rmn_sd),
-          Handler.new([:repeater_day_name, :repeater_month_name, :scalar_day, :scalar_year], :handle_rdn_rmn_sd_sy),
-          Handler.new([:repeater_day_name, :repeater_month_name, :ordinal_day], :handle_rdn_rmn_od),
-          Handler.new([:repeater_day_name, :repeater_month_name, :scalar_day, :separator_at?, 'time?'], :handle_rdn_rmn_sd),
-          Handler.new([:repeater_day_name, :repeater_month_name, :ordinal_day, :separator_at?, 'time?'], :handle_rdn_rmn_od),
-          Handler.new([:repeater_day_name, :ordinal_day, :separator_at?, 'time?'], :handle_rdn_od),
-          Handler.new([:scalar_year, :separator_slash_or_dash, :scalar_month, :separator_slash_or_dash, :scalar_day, :repeater_time, :time_zone], :handle_generic),
-          Handler.new([:repeater_month_name, :scalar_day, :scalar_year], :handle_rmn_sd_sy),
-          Handler.new([:repeater_month_name, :ordinal_day, :scalar_year], :handle_rmn_od_sy),
-          Handler.new([:repeater_month_name, :scalar_day, :scalar_year, :separator_at?, 'time?'], :handle_rmn_sd_sy),
-          Handler.new([:repeater_month_name, :ordinal_day, :scalar_year, :separator_at?, 'time?'], :handle_rmn_od_sy),
-          Handler.new([:repeater_month_name, :separator_slash_or_dash?, :scalar_day, :separator_at?, 'time?'], :handle_rmn_sd),
-          Handler.new([:repeater_time, :repeater_day_portion?, :separator_on?, :repeater_month_name, :scalar_day], :handle_rmn_sd_on),
-          Handler.new([:repeater_month_name, :ordinal_day, :separator_at?, 'time?'], :handle_rmn_od),
-          Handler.new([:ordinal_day, :repeater_month_name, :scalar_year, :separator_at?, 'time?'], :handle_od_rmn_sy),
-          Handler.new([:ordinal_day, :repeater_month_name, :separator_at?, 'time?'], :handle_od_rmn),
-          Handler.new([:ordinal_day, :grabber?, :repeater_month, :separator_at?, 'time?'], :handle_od_rm),
-          Handler.new([:scalar_year, :repeater_month_name, :ordinal_day], :handle_sy_rmn_od),
-          Handler.new([:repeater_time, :repeater_day_portion?, :separator_on?, :repeater_month_name, :ordinal_day], :handle_rmn_od_on),
-          Handler.new([:repeater_month_name, :scalar_year], :handle_rmn_sy),
-          Handler.new([:scalar_day, :repeater_month_name, :scalar_year, :separator_at?, 'time?'], :handle_sd_rmn_sy),
-          Handler.new([:scalar_day, :separator_slash_or_dash?, :repeater_month_name, :separator_at?, 'time?'], :handle_sd_rmn),
-          Handler.new([:scalar_year, :separator_slash_or_dash, :scalar_month, :separator_slash_or_dash, :scalar_day, :separator_at?, 'time?'], :handle_sy_sm_sd),
-          Handler.new([:scalar_year, :separator_slash_or_dash, :scalar_month], :handle_sy_sm),
-          Handler.new([:scalar_month, :separator_slash_or_dash, :scalar_year], :handle_sm_sy),
-          Handler.new([:scalar_day, :separator_slash_or_dash, :repeater_month_name, :separator_slash_or_dash, :scalar_year, :repeater_time?], :handle_sm_rmn_sy),
-          Handler.new([:scalar_year, :separator_slash_or_dash, :scalar_month, :separator_slash_or_dash, :scalar?, :time_zone], :handle_generic),
-        ],
-
-        :anchor => [
-          Handler.new([:separator_on?, :grabber?, :repeater, :separator_at?, :repeater?, :repeater?], :handle_r),
-          Handler.new([:grabber?, :repeater, :repeater, :separator?, :repeater?, :repeater?], :handle_r),
-          Handler.new([:repeater, :grabber, :repeater], :handle_r_g_r)
-        ],
-
-        :arrow => [
-          Handler.new([:scalar, :repeater, :pointer], :handle_s_r_p),
-          Handler.new([:scalar, :repeater, :separator_and?, :scalar, :repeater, :pointer, :separator_at?, 'anchor'], :handle_s_r_a_s_r_p_a),
-          Handler.new([:pointer, :scalar, :repeater], :handle_p_s_r),
-          Handler.new([:scalar, :repeater, :pointer, :separator_at?, 'anchor'], :handle_s_r_p_a)
-        ],
-
-        :narrow => [
-          Handler.new([:ordinal, :repeater, :separator_in, :repeater], :handle_o_r_s_r),
-          Handler.new([:ordinal, :repeater, :grabber, :repeater], :handle_o_r_g_r)
-        ]
-      }
-
-      endians = [
-        Handler.new([:scalar_month, :separator_slash_or_dash, :scalar_day, :separator_slash_or_dash, :scalar_year, :separator_at?, 'time?'], :handle_sm_sd_sy),
-        Handler.new([:scalar_month, :separator_slash_or_dash, :scalar_day, :separator_at?, 'time?'], :handle_sm_sd),
-        Handler.new([:scalar_day, :separator_slash_or_dash, :scalar_month, :separator_at?, 'time?'], :handle_sd_sm),
-        Handler.new([:scalar_day, :separator_slash_or_dash, :scalar_month, :separator_slash_or_dash, :scalar_year, :separator_at?, 'time?'], :handle_sd_sm_sy)
-      ]
-
-      case endian = Array(options[:endian_precedence]).first
-      when :little
-        @@definitions.merge(:endian => endians.reverse)
-      when :middle
-        @@definitions.merge(:endian => endians)
-      else
-        raise ArgumentError, "Unknown endian option '#{endian}'"
-      end
+      SpanDictionary.new(options).definitions
     end
 
     private
@@ -196,7 +130,7 @@ module Chronic
     def tokenize(text, options)
       text = pre_normalize(text)
       tokens = text.split(' ').map { |word| Token.new(word) }
-      [Repeater, Grabber, Pointer, Scalar, Ordinal, Separator, TimeZone].each do |tok|
+      [Repeater, Grabber, Pointer, Scalar, Ordinal, Separator, Sign, TimeZone].each do |tok|
         tok.scan(tokens, options)
       end
       tokens.select { |token| token.tagged? }
@@ -221,7 +155,7 @@ module Chronic
 
       definitions[:arrow].each do |handler|
         if handler.match(tokens, definitions)
-          good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlashOrDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
+          good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
           return handler.invoke(:arrow, good_tokens, self, options)
         end
       end
@@ -232,7 +166,7 @@ module Chronic
         end
       end
 
-      puts "-none" if Chronic.debug
+      puts '-none' if Chronic.debug
       return nil
     end
   end

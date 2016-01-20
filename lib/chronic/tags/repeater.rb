@@ -10,12 +10,12 @@ module Chronic
     # Returns an Array of tokens.
     def self.scan(tokens, options)
       tokens.each do |token|
-        if t = scan_for_season_names(token) then token.tag(t); next end
-        if t = scan_for_month_names(token) then token.tag(t); next end
-        if t = scan_for_day_names(token) then token.tag(t); next end
-        if t = scan_for_day_portions(token) then token.tag(t); next end
-        if t = scan_for_times(token) then token.tag(t); next end
-        if t = scan_for_units(token) then token.tag(t); next end
+        token.tag scan_for_season_names(token, options)
+        token.tag scan_for_month_names(token, options)
+        token.tag scan_for_day_names(token, options)
+        token.tag scan_for_day_portions(token, options)
+        token.tag scan_for_times(token, options)
+        token.tag scan_for_units(token, options)
       end
     end
 
@@ -50,19 +50,19 @@ module Chronic
     # token - The Token object we want to scan.
     #
     # Returns a new Repeater object.
-    def self.scan_for_times(token)
-      scan_for token, RepeaterTime, /^\d{1,2}(:?\d{1,2})?([\.:]?\d{1,2})?$/
+    def self.scan_for_times(token, options = {})
+      scan_for token, RepeaterTime, /^\d{1,2}(:?\d{1,2})?([\.:]?\d{1,2}([\.:]\d{1,6})?)?$/, options
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new Repeater object.
-    def self.scan_for_units(token)
+    def self.scan_for_units(token, options = {})
       Chronic.translate([:repeater, :units]).each do |item, symbol|
         if item =~ token.word
           klass_name = 'Repeater' + symbol.to_s.capitalize
           klass = Chronic.const_get(klass_name)
-          return klass.new(symbol)
+          return klass.new(symbol, options)
         end
       end
       return nil
@@ -74,16 +74,16 @@ module Chronic
 
     # returns the width (in seconds or months) of this repeatable.
     def width
-      raise("Repeater#width must be overridden in subclasses")
+      raise('Repeater#width must be overridden in subclasses')
     end
 
     # returns the next occurance of this repeatable.
     def next(pointer)
-      raise("Start point must be set before calling #next") unless @now
+      raise('Start point must be set before calling #next') unless @now
     end
 
     def this(pointer)
-      raise("Start point must be set before calling #this") unless @now
+      raise('Start point must be set before calling #this') unless @now
     end
 
     def to_s

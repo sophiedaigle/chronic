@@ -9,8 +9,9 @@ module Chronic
       :night => (20 * 60 * 60)..(24 * 60 * 60),     # 8pm-12pm
     }
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_span = nil
 
       if type.kind_of? Integer
         @range = (@type * 60 * 60)..((@type + 12) * 60 * 60)
@@ -19,13 +20,13 @@ module Chronic
         @range || raise("Invalid type '#{type}' for RepeaterDayPortion")
       end
 
-      @range || raise("Range should have been set by now")
+      @range || raise('Range should have been set by now')
     end
 
     def next(pointer)
       super
 
-      if !@current_span
+      unless @current_span
         now_seconds = @now - Chronic.construct(@now.year, @now.month, @now.day)
         if now_seconds < @range.begin
           case pointer
@@ -83,7 +84,7 @@ module Chronic
     end
 
     def width
-      @range || raise("Range has not been set")
+      @range || raise('Range has not been set')
       return @current_span.width if @current_span
       if @type.kind_of? Integer
         return (12 * 60 * 60)

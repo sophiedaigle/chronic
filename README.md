@@ -37,7 +37,14 @@ Chronic.parse('may 27th', :guess => false)
 
 Chronic.parse('6/4/2012', :endian_precedence => :little)
   #=> Fri Apr 06 00:00:00 PDT 2012
+
+Chronic.parse('INVALID DATE')
+  #=> nil
 ```
+
+If the parser can find a date or time, either a Time or Chronic::Span
+will be returned (depending on the value of `:guess`). If no
+date or time can be found, `nil` will be returned.
 
 See `Chronic.parse` for detailed usage instructions.
 
@@ -128,6 +135,7 @@ Specific Times (many of the above with an added time)
 * January 5 at 7pm
 * 22nd of june at 8am
 * 1979-05-27 05:00:00
+* 03/01/2012 07:25:09.234567
 * etc
 
 
@@ -177,9 +185,10 @@ The best way to get your changes merged back into core is as follows:
 
 1. Clone down your fork
 1. Create a thoughtfully named topic branch to contain your change
+1. Install the development dependencies by running `bundle install`
 1. Hack away
-1. Add tests and make sure everything still passes by running `rake`
-1. Ensure your tests pass in multiple timezones. ie `TZ=utc rake` `TZ=BST rake`
+1. Add tests and make sure everything still passes by running `bundle exec rake`
+1. Ensure your tests pass in multiple timezones. ie `TZ=utc bundle exec rake` `TZ=BST bundle exec rake`
 1. If you are adding new functionality, document it in the README
 1. Do not change the version number, we will do that on our end
 1. If necessary, rebase your commits into logical chunks, without errors

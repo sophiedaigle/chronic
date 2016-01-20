@@ -8,8 +8,10 @@ module Chronic
       :winter => Season.new(MiniDate.new(12,22), MiniDate.new(3,19))
     }
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @next_season_start = nil
+      @next_season_end = nil
     end
 
     def next(pointer)
@@ -63,7 +65,7 @@ module Chronic
     private
 
     def find_next_season_span(direction, next_season)
-      unless @next_season_start or @next_season_end
+      unless @next_season_start || @next_season_end
         @next_season_start = Chronic.construct(@now.year, @now.month, @now.day)
         @next_season_end = Chronic.construct(@now.year, @now.month, @now.day)
       end

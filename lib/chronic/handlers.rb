@@ -8,6 +8,7 @@ module Chronic
       span = month.this(options[:context])
       year, month = span.begin.year, span.begin.month
       day_start = Chronic.time_class.local(year, month, day)
+      day_start = Chronic.time_class.local(year + 1, month, day) if options[:context] == :future && day_start < now
 
       day_or_time(day_start, time_tokens, options)
     end
@@ -306,6 +307,23 @@ module Chronic
       end
     end
 
+    # Handle RepeaterDayName RepeaterMonthName OrdinalDay ScalarYear
+    def handle_rdn_rmn_od_sy(tokens, options)
+      month = tokens[1].get_tag(RepeaterMonthName)
+      day = tokens[2].get_tag(OrdinalDay).type
+      year = tokens[3].get_tag(ScalarYear).type
+
+      return if month_overflow?(year, month.index, day)
+
+      begin
+        start_time = Chronic.time_class.local(year, month.index, day)
+        end_time = time_with_rollover(year, month.index, day + 1)
+        Span.new(start_time, end_time)
+      rescue ArgumentError
+        nil
+      end
+    end
+
     # Handle RepeaterDayName OrdinalDay
     def handle_rdn_od(tokens, options)
       day = tokens[1].get_tag(OrdinalDay).type
@@ -478,7 +496,7 @@ module Chronic
     def day_or_time(day_start, time_tokens, options)
       outer_span = Span.new(day_start, day_start + (24 * 60 * 60))
 
-      if !time_tokens.empty?
+      unless time_tokens.empty?
         self.now = outer_span.begin
         get_anchor(dealias_and_disambiguate_times(time_tokens, options), options.merge(:context => :future))
       else
@@ -511,7 +529,7 @@ module Chronic
       when :next
         outer_span = head.next(:future)
       else
-        raise "Invalid grabber"
+        raise 'Invalid grabber'
       end
 
       if Chronic.debug
@@ -527,7 +545,7 @@ module Chronic
     end
 
     def month_overflow?(year, month, day)
-      if Date.leap?(year)
+      if ::Date.leap?(year)
         day > RepeaterMonth::MONTH_DAYS_LEAP[month - 1]
       else
         day > RepeaterMonth::MONTH_DAYS[month - 1]

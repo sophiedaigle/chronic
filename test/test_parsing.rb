@@ -18,25 +18,36 @@ class TestParsing < TestCase
     time = Chronic.parse("2012-08-02T08:00:00-04:00")
     assert_equal Time.utc(2012, 8, 2, 12), time
 
+    time = Chronic.parse("2013-08-01T19:30:00.345-07:00")
+    time2 = Time.parse("2013-08-01 019:30:00.345-07:00")
+    assert_in_delta time, time2, 0.001
+
     time = Chronic.parse("2012-08-02T12:00:00Z")
     assert_equal Time.utc(2012, 8, 2, 12), time
 
     time = Chronic.parse("2012-01-03 01:00:00.100")
     time2 = Time.parse("2012-01-03 01:00:00.100")
-    assert_equal time, time2
+    assert_in_delta time, time2, 0.001
+
+    time = Chronic.parse("2012-01-03 01:00:00.234567")
+    time2 = Time.parse("2012-01-03 01:00:00.234567")
+    assert_in_delta time, time2, 0.000001
 
     assert_nil Chronic.parse("1/1/32.1")
+
+    time = Chronic.parse("28th", {:guess => :begin})
+    assert_equal Time.new(Time.now.year, Time.now.month, 28), time
   end
 
   def test_handle_rmn_sd
     time = parse_now("aug 3")
-    assert_equal Time.local(2006, 8, 3, 12), time
+    assert_equal Time.local(2007, 8, 3, 12), time
 
     time = parse_now("aug 3", :context => :past)
     assert_equal Time.local(2006, 8, 3, 12), time
 
     time = parse_now("aug. 3")
-    assert_equal Time.local(2006, 8, 3, 12), time
+    assert_equal Time.local(2007, 8, 3, 12), time
 
     time = parse_now("aug 20")
     assert_equal Time.local(2006, 8, 20, 12), time
@@ -61,6 +72,9 @@ class TestParsing < TestCase
 
     time = parse_now("may 28 at 5:32.19pm", :context => :past)
     assert_equal Time.local(2006, 5, 28, 17, 32, 19), time
+
+    time = parse_now("may 28 at 5:32:19.764")
+    assert_in_delta Time.local(2007, 5, 28, 17, 32, 19, 764000), time, 0.001
   end
 
   def test_handle_rmn_sd_on
@@ -93,7 +107,7 @@ class TestParsing < TestCase
 
   def test_handle_od_rm
     time = parse_now("fifteenth of this month")
-    assert_equal Time.local(2006, 8, 15, 12), time
+    assert_equal Time.local(2007, 8, 15, 12), time
   end
 
   def test_handle_od_rmn
@@ -166,8 +180,14 @@ class TestParsing < TestCase
     time = parse_now("2011-07-03 22:11:35 +01:00")
     assert_equal 1309727495, time.to_i
 
+    time = parse_now("2011-07-03 16:11:35 -05:00")
+    assert_equal 1309727495, time.to_i
+
     time = parse_now("2011-07-03 21:11:35 UTC")
     assert_equal 1309727495, time.to_i
+
+    time = parse_now("2011-07-03 21:11:35.362 UTC")
+    assert_in_delta 1309727495.362, time.to_f, 0.001
   end
 
   def test_handle_rmn_sd_sy
@@ -263,6 +283,15 @@ class TestParsing < TestCase
 
     time = parse_now("27 Oct 2006 7:30pm")
     assert_equal Time.local(2006, 10, 27, 19, 30), time
+
+    time = parse_now("3 jan 10")
+    assert_equal Time.local(2010, 1, 3, 12), time
+
+    time = parse_now("3 jan 10", :endian_precedence => :little)
+    assert_equal Time.local(2010, 1, 3, 12), time
+
+    time = parse_now("3 jan 10", :endian_precedence => :middle)
+    assert_equal Time.local(2010, 1, 3, 12), time
   end
 
   def test_handle_sm_sd_sy
@@ -298,6 +327,15 @@ class TestParsing < TestCase
 
     time = parse_now("03/18/2012 09:26 pm")
     assert_equal Time.local(2012, 3, 18, 21, 26), time
+
+    time = parse_now("30.07.2013 16:34:22")
+    assert_equal Time.local(2013, 7, 30, 16, 34, 22), time
+
+    time = parse_now("09.08.2013")
+    assert_equal Time.local(2013, 8, 9, 12), time
+
+    time = parse_now("30-07-2013 21:53:49")
+    assert_equal Time.local(2013, 7, 30, 21, 53, 49), time
   end
 
   def test_handle_sy_sm_sd
@@ -322,8 +360,17 @@ class TestParsing < TestCase
     time = parse_now("2006-08-20 15:30.30")
     assert_equal Time.local(2006, 8, 20, 15, 30, 30), time
 
+    time = parse_now("2006-08-20 15:30:30:000536")
+    assert_in_delta Time.local(2006, 8, 20, 15, 30, 30, 536), time, 0.000001
+
     time = parse_now("1902-08-20")
     assert_equal Time.local(1902, 8, 20, 12, 0, 0), time
+
+    time = parse_now("2013.07.30 11:45:23")
+    assert_equal Time.local(2013, 7, 30, 11, 45, 23), time
+
+    time = parse_now("2013.08.09")
+    assert_equal Time.local(2013, 8, 9, 12, 0, 0), time
 
     # exif date time original
     time = parse_now("2012:05:25 22:06:50")
@@ -388,6 +435,21 @@ class TestParsing < TestCase
 
     time = parse_now("01:00:00 PM")
     assert_equal Time.local(2006, 8, 16, 13), time
+
+    time = parse_now("today at 02:00:00", :hours24 => false)
+    assert_equal Time.local(2006, 8, 16, 14), time
+
+    time = parse_now("today at 02:00:00 AM", :hours24 => false)
+    assert_equal Time.local(2006, 8, 16, 2), time
+
+    time = parse_now("today at 3:00:00", :hours24 => true)
+    assert_equal Time.local(2006, 8, 16, 3), time
+
+    time = parse_now("today at 03:00:00", :hours24 => true)
+    assert_equal Time.local(2006, 8, 16, 3), time
+
+    time = parse_now("tomorrow at 4a.m.")
+    assert_equal Time.local(2006, 8, 17, 4), time
   end
 
   def test_handle_r_g_r
@@ -593,6 +655,12 @@ class TestParsing < TestCase
 
     time = parse_now("this week", :context => :past)
     assert_equal Time.local(2006, 8, 14, 19), time
+
+    time = parse_now("this week", :context => :past, :guess => :begin)
+    assert_equal Time.local(2006, 8, 13), time
+
+    time = parse_now("this week", :context => :past, :guess => :begin, :week_start => :monday)
+    assert_equal Time.local(2006, 8, 14), time
 
     # weekend
 
@@ -953,6 +1021,9 @@ class TestParsing < TestCase
 
     time = parse_now("Ham Sandwich")
     assert_equal nil, time
+
+    time = parse_now("t")
+    assert_equal nil, time
   end
 
   def test_parse_span
@@ -1152,6 +1223,20 @@ class TestParsing < TestCase
 
     time = parse_now("Thursday December 31st")
     assert_equal Time.local(2006, 12, 31, 12), time
+  end
+
+  def test_handle_rdn_rmn_od_sy
+    time = parse_now("Thu Aug 10th 2005")
+    assert_equal Time.local(2005, 8, 10, 12), time
+
+    time = parse_now("Thursday July 31st 2005")
+    assert_equal Time.local(2005, 7, 31, 12), time
+
+    time = parse_now("Thursday December 31st 2005")
+    assert_equal Time.local(2005, 12, 31, 12), time
+
+    time = parse_now("Thursday December 30th 2005")
+    assert_equal Time.local(2005, 12, 30, 12), time
   end
 
   def test_normalizing_day_portions

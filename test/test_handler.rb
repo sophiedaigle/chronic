@@ -8,7 +8,7 @@ class TestHandler < TestCase
   end
 
   def definitions
-    @definitions ||= Chronic::Parser.new.definitions
+    @definitions ||= Chronic::SpanDictionary.new.definitions
   end
 
   def test_handler_class_1
@@ -101,6 +101,26 @@ class TestHandler < TestCase
     tokens[0].tag(Chronic::Scalar.new(3))
     tokens[1].tag(Chronic::RepeaterYear.new(:year))
     tokens[2].tag(Chronic::Pointer.new(:past))
+
+    assert handler.match(tokens, definitions)
+  end
+
+  def test_handler_class_7
+    handler = Chronic::Handler.new([[:separator_on, :separator_at], :scalar], :handler)
+
+    tokens = [Chronic::Token.new('at'),
+              Chronic::Token.new('14')]
+
+    tokens[0].tag(Chronic::SeparatorAt.new('at'))
+    tokens[1].tag(Chronic::Scalar.new(14))
+
+    assert handler.match(tokens, definitions)
+
+    tokens = [Chronic::Token.new('on'),
+              Chronic::Token.new('15')]
+
+    tokens[0].tag(Chronic::SeparatorOn.new('on'))
+    tokens[1].tag(Chronic::Scalar.new(15))
 
     assert handler.match(tokens, definitions)
   end

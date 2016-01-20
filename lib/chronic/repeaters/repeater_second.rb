@@ -2,8 +2,9 @@ module Chronic
   class RepeaterSecond < Repeater #:nodoc:
     SECOND_SECONDS = 1 # haha, awesome
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @second_start = nil
     end
 
     def next(pointer = :future)
@@ -11,7 +12,7 @@ module Chronic
 
       direction = pointer == :future ? 1 : -1
 
-      if !@second_start
+      unless @second_start
         @second_start = @now + (direction * SECOND_SECONDS)
       else
         @second_start += SECOND_SECONDS * direction

@@ -2,14 +2,15 @@ module Chronic
   class RepeaterYear < Repeater #:nodoc:
     YEAR_SECONDS =  31536000  # 365 * 24 * 60 * 60
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_year_start = nil
     end
 
     def next(pointer)
       super
 
-      if !@current_year_start
+      unless @current_year_start
         case pointer
         when :future
           @current_year_start = Chronic.construct(@now.year + 1)
@@ -67,7 +68,7 @@ module Chronic
     end
 
     def month_days(year, month)
-      if Date.leap?(year)
+      if ::Date.leap?(year)
         RepeaterMonth::MONTH_DAYS_LEAP[month - 1]
       else
         RepeaterMonth::MONTH_DAYS[month - 1]

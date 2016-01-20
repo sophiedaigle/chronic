@@ -15,7 +15,7 @@ module Chronic
     #
     # Returns nothing.
     def tag(new_tag)
-      @tags << new_tag
+      @tags << new_tag if new_tag
     end
 
     # Remove all tags of the given class.
@@ -41,7 +41,7 @@ module Chronic
 
     # Print this Token in a pretty way
     def to_s
-      @word << '(' << @tags.join(', ') << ') '
+      @word + '(' + @tags.join(', ') + ') '
     end
 
     def inspect

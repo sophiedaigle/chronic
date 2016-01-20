@@ -1,3 +1,24 @@
+# 0.10.2 / 2013-09-09
+
+* Fix 1.8.7 support (due to be dropped in 0.11.0)
+* Bugfix for times with negative zones
+
+# 0.10.1 / 2013-08-27
+
+* Support `ActiveSupport::TimeZone` (#209, #208)
+
+# 0.10.0 / 2013-08-25
+
+* Chronic will parse subseconds correctly
+  for all supported date/time formats (#195, #198 and #200)
+* Support for date format: dd.mm.yyyy (#197)
+* Option `:hours24` to parse as 24 hour clock (#201 and #202)
+* `:guess` option allows to specify which part of Span to return.
+  (accepted values `false`,`true`,`:begin`, `:middle`, `:end`)
+* Replace `rcov` with `SimpleCov` for coverage generation
+* Add more tests
+* Various changes in codebase (#202 and #206)
+
 # 0.9.1 / 2013-02-25
 
 * Ensure Chronic strips periods from day portions (#173)

@@ -2,14 +2,15 @@ module Chronic
   class RepeaterFortnight < Repeater #:nodoc:
     FORTNIGHT_SECONDS = 1_209_600 # (14 * 24 * 60 * 60)
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_fortnight_start = nil
     end
 
     def next(pointer)
       super
 
-      if !@current_fortnight_start
+      unless @current_fortnight_start
         case pointer
         when :future
           sunday_repeater = RepeaterDayName.new(:sunday)

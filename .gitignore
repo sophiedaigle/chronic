@@ -1,6 +1,8 @@
-pkg
 *.rbc
-rdoc
 .yardoc
-doc
-tags
+/.bundle/
+/pkg/
+/coverage/
+/doc/
+/tags/
+Gemfile.lock

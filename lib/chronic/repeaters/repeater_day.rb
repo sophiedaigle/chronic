@@ -2,14 +2,15 @@ module Chronic
   class RepeaterDay < Repeater #:nodoc:
     DAY_SECONDS = 86_400 # (24 * 60 * 60)
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_day_start = nil
     end
 
     def next(pointer)
       super
 
-      if !@current_day_start
+      unless @current_day_start
         @current_day_start = Chronic.time_class.local(@now.year, @now.month, @now.day)
       end
 

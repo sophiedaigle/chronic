@@ -11,8 +11,9 @@ module Chronic
       :saturday => 6
     }
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_weekday_start = nil
     end
 
     def next(pointer)
@@ -20,7 +21,7 @@ module Chronic
 
       direction = pointer == :future ? 1 : -1
 
-      if !@current_weekday_start
+      unless @current_weekday_start
         @current_weekday_start = Chronic.construct(@now.year, @now.month, @now.day)
         @current_weekday_start += direction * DAY_SECONDS
 
@@ -79,7 +80,7 @@ module Chronic
     end
 
     def symbol_to_number(sym)
-      DAYS[sym] || raise("Invalid symbol specified")
+      DAYS[sym] || raise('Invalid symbol specified')
     end
   end
 end

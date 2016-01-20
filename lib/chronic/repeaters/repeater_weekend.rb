@@ -2,14 +2,15 @@ module Chronic
   class RepeaterWeekend < Repeater #:nodoc:
     WEEKEND_SECONDS = 172_800 # (2 * 24 * 60 * 60)
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_week_start = nil
     end
 
     def next(pointer)
       super
 
-      if !@current_week_start
+      unless @current_week_start
         case pointer
         when :future
           saturday_repeater = RepeaterDayName.new(:saturday)

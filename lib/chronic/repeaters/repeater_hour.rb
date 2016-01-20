@@ -2,14 +2,15 @@ module Chronic
   class RepeaterHour < Repeater #:nodoc:
     HOUR_SECONDS = 3600 # 60 * 60
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_hour_start = nil
     end
 
     def next(pointer)
       super
 
-      if !@current_hour_start
+      unless @current_hour_start
         case pointer
         when :future
           @current_hour_start = Chronic.construct(@now.year, @now.month, @now.day, @now.hour + 1)

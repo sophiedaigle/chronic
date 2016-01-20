@@ -16,14 +16,15 @@ module Chronic
       :december => 12
     }
 
-    def initialize(type)
+    def initialize(type, options = {})
       super
+      @current_month_begin = nil
     end
 
     def next(pointer)
       super
 
-      if !@current_month_begin
+      unless @current_month_begin
         case pointer
         when :future
           if @now.month < index
@@ -44,7 +45,7 @@ module Chronic
             @current_month_begin = Chronic.construct(@now.year - 1, index)
           end
         end
-        @current_month_begin || raise("Current month should be set by now")
+        @current_month_begin || raise('Current month should be set by now')
       else
         case pointer
         when :future
