@@ -30,95 +30,92 @@ module Chronic
     #
     # Returns a new SeparatorComma object.
     def self.scan_for_commas(token)
-      scan_for token, SeparatorComma, { /^,$/ => :comma }
+      scan_for token, SeparatorComma, { Chronic.translate([:token, :comma]) => :comma }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorDot object.
     def self.scan_for_dots(token)
-      scan_for token, SeparatorDot, { /^\.$/ => :dot }
+      scan_for token, SeparatorDot, { Chronic.translate([:token, :dot]) => :dot }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorColon object.
     def self.scan_for_colon(token)
-      scan_for token, SeparatorColon, { /^:$/ => :colon }
+      scan_for token, SeparatorColon, { Chronic.translate([:token, :colon]) => :colon }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorSpace object.
     def self.scan_for_space(token)
-      scan_for token, SeparatorSpace, { /^ $/ => :space }
+      scan_for token, SeparatorSpace, { Chronic.translate([:token, :space]) => :space }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorSlash object.
     def self.scan_for_slash(token)
-      scan_for token, SeparatorSlash, { /^\/$/ => :slash }
+      scan_for token, SeparatorSlash, { Chronic.translate([:token, :slash]) => :slash }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorDash object.
     def self.scan_for_dash(token)
-      scan_for token, SeparatorDash, { /^-$/ => :dash }
+      scan_for token, SeparatorDash, { Chronic.translate([:token, :dash]) => :dash }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorQuote object.
     def self.scan_for_quote(token)
-      scan_for token, SeparatorQuote,
-      {
-        /^'$/ => :single_quote,
-        /^"$/ => :double_quote
-      }
+      scan_for token, SeparatorQuote, { Chronic.translate([:token, :single_quote]) => :single_quote }
+      scan_for token, SeparatorQuote, { Chronic.translate([:token, :double_quote]) => :double_quote }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorAt object.
     def self.scan_for_at(token)
-      scan_for token, SeparatorAt, { /^(at|@)$/ => :at }
+      scan_for token, SeparatorAt, { Chronic.translate([:token, :at]) => :at }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorIn object.
     def self.scan_for_in(token)
-      scan_for token, SeparatorIn, { /^in$/ => :in }
+      scan_for token, SeparatorIn, { Chronic.translate([:token, :in]) => :in }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeparatorOn object.
     def self.scan_for_on(token)
-      scan_for token, SeparatorOn, { /^on$/ => :on }
+      scan_for token, SeparatorOn, { Chronic.translate([:token, :on]) => :on }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeperatorAnd Object object.
     def self.scan_for_and(token)
-      scan_for token, SeparatorAnd, { /^and$/ => :and }
+      scan_for token, SeparatorAnd, { Chronic.translate([:token, :and]) => :and }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeperatorT Object object.
     def self.scan_for_t(token)
-      scan_for token, SeparatorT, { /^t$/ => :T }
+      scan_for token, SeparatorT, { Chronic.translate([:token, :T]) => :T }
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new SeperatorW Object object.
     def self.scan_for_w(token)
-      scan_for token, SeparatorW, { /^w$/ => :W }
+      scan_for token, SeparatorW, { Chronic.translate([:token, :W]) => :W }
     end
 
     def to_s

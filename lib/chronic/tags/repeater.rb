@@ -22,29 +22,29 @@ module Chronic
     # token - The Token object we want to scan.
     #
     # Returns a new Repeater object.
-    def self.scan_for_season_names(token)
-      scan_for token, RepeaterSeasonName, Chronic.translate([:repeater, :season_names])
+    def self.scan_for_season_names(token, options = {})
+      scan_for token, RepeaterSeasonName, Chronic.translate([:repeater, :season_names]), options
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new Repeater object.
-    def self.scan_for_month_names(token)
-      scan_for token, RepeaterMonthName, Chronic.translate([:repeater, :month_names])
+    def self.scan_for_month_names(token, options = {})
+      scan_for token, RepeaterMonthName, Chronic.translate([:repeater, :month_names]), options
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new Repeater object.
-    def self.scan_for_day_names(token)
-      scan_for token, RepeaterDayName, Chronic.translate([:repeater, :day_names])
+    def self.scan_for_day_names(token, options = {})
+      scan_for token, RepeaterDayName, Chronic.translate([:repeater, :day_names]), options
     end
 
     # token - The Token object we want to scan.
     #
     # Returns a new Repeater object.
-    def self.scan_for_day_portions(token)
-      scan_for token, RepeaterDayPortion, Chronic.translate([:repeater, :day_portions])
+    def self.scan_for_day_portions(token, options)
+      scan_for token, RepeaterDayPortion, Chronic.translate([:repeater, :day_portions]), options
     end
 
     # token - The Token object we want to scan.
