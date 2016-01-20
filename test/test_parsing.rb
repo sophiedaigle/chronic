@@ -5,7 +5,13 @@ class TestParsing < TestCase
   TIME_2006_08_16_14_00_00 = Time.local(2006, 8, 16, 14, 0, 0, 0)
 
   def setup
+    @locale_before = Chronic.locales
+    Chronic.set_locale(:en)
     @time_2006_08_16_14_00_00 = TIME_2006_08_16_14_00_00
+  end
+
+  def teardown
+    Chronic.set_locale(@locale_before)
   end
 
   def test_handle_generic

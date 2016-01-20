@@ -88,17 +88,32 @@ module Chronic
     #     # => Thu, 15 Jun 2006 05:45:00 UTC +00:00
     #
     # Returns the locale name Chronic uses internally
-    attr_accessor :locale
+    attr_accessor :locales
+
+    # The current node Chronic is using to parse strings
+    #
+    # Examples:
+    #
+    #   require 'chronic'
+    #
+    #   Chronic.setup_node([:en, :fr])
+    #   Chronic.parse('15 juin 2006 a 5:54 du matin')
+    #     # => Thu, 15 Jun 2006 05:45:00 UTC +00:00
+    #
+    # Returns the node hash Chronic uses internally
+    attr_accessor :node
   end
 
   self.debug = false
   self.time_class = ::Time
-  self.locale = :en
+  self.locales = [:en]
 
   require 'chronic/locales/en'
+  require 'chronic/locales/fr'
 
   self.locale_hashes = {
-    :en => Chronic::Locales::EN
+    :en => Chronic::Locales::EN,
+    :fr => Chronic::Locales::FR
   }
 
   # Parses a string containing a natural language date or time.
@@ -111,7 +126,9 @@ module Chronic
   # opts - An optional Hash of configuration options passed to Parser::new.
   def self.parse(text, options = {})
     # ensure current locale is available
-    raise ArgumentError, "#{locale} is not an available locale" unless has_locale(locale)
+    locales.each do |locale|
+      raise ArgumentError, "#{locale} is not an available locale" unless has_locale(locale)
+    end
 
     Parser.new(options).parse(text)
   end
@@ -134,14 +151,51 @@ module Chronic
     locale_hashes.include? name
   end
 
+  #Allows you to set the locales which then generates the node hash
+  def self.set_locale(locales)
+    if locales.kind_of?(Array)
+      self.locales = locales 
+    else
+      self.locales = [locales]
+    end
+    setup_node
+  end
 
-  # Returns the translations for the current locale
+  #Sets up the node hash
+  def self.setup_node
+    nodes = []
+    self.locales.each do |loc|
+      nodes << locale_hashes[loc].dup if has_locale(loc)
+    end
+    existing_keys = nodes.flat_map(&:keys).uniq if nodes.size > 1
+    self.node = nodes.shift
+    while nodes.size > 0 do
+      merged_node = nodes.shift
+      existing_keys.each do |key|
+        case key
+          when :repeater
+            self.node[key] = node[key].merge(merged_node[key]) {|key,oldval,newval| oldval.merge(newval)}
+          when :grabber || :pointer
+            self.node[key] = node[key].merge(merged_node[key])
+          when :ordinal_regex
+            self.node[key] = Regexp.union(node[key], merged_node[key])
+          when :token
+            self.node[key] = node[key].merge(merged_node[key]) {|key,oldval,newval| Regexp.union(*oldval, *newval)}
+          else
+            self.node[key] = node[key].merge(merged_node[key]) {|key,oldval,newval| if key == :and then Regexp.union(*oldval, *newval) else ([*oldval].to_a + [*newval].to_a).uniq end}
+        end
+      end
+    end
+  end
+
+  # Returns the translations for the current node
+  # If a locale is passed in, it overrides the current node
   def self.translate(keys, loc=nil)
-    loc ||= locale
-    node = locale_hashes[loc]
+    node = locale_hashes[loc] if !loc.nil?
+    node ||= self.node || setup_node
 
     keys.each do |key|
-      if node.include? key
+      if !node.nil? && (node.include? key)
         node = node[key]
       else
         return translate(keys, :en)
