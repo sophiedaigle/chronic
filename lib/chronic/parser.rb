@@ -93,7 +93,14 @@ module Chronic
     # Returns a new String ready for Chronic to parse.
     def pre_normalize(text)
       text = text.to_s.downcase
-      text = Chronic.translate([:pre_normalize, :preprocess]).call(text)
+      preprocess = Chronic.translate([:pre_normalize, :preprocess])
+      if preprocess.is_a? Proc
+        text = preprocess.call(text)
+      else
+        preprocess.each do |proc|
+          text = proc.call(text)
+        end
+      end
       Chronic.translate([:pre_normalize, :pre_numerize]).each do |sub|
         text.gsub!(*sub)
       end

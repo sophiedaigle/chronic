@@ -22,7 +22,7 @@ module Chronic
       end
 
       Chronic.translate([:numerizer, :ordinals]).each do |on|
-        string.gsub!(/#{on[0]}/i, '<num>' + on[1] + on[0][-2, 2])
+        string.gsub!(on[0], '<num>' + on[1])
       end
 
       # ten, twenty, etc.
