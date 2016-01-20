@@ -1,3 +1,4 @@
+require 'chronic/dictionary'
 require 'chronic/handlers'
 
 module Chronic
@@ -96,7 +97,7 @@ module Chronic
       Chronic.translate([:pre_normalize, :pre_numerize]).each do |sub|
         text.gsub!(*sub)
       end
-      text = Numerizer.numerize(text)
+      text = Chronic::Numerizer.numerize(text)
       Chronic.translate([:pre_normalize, :pos_numerize]).each do |sub|
         text.gsub!(*sub)
       end

@@ -129,6 +129,8 @@ module Chronic
       :pre_normalize => {
         :preprocess => proc {|str| str},
         :pre_numerize => [
+          [/\b(\d{2})\.(\d{2})\.(\d{4})\b/, '\3 / \2 / \1'],
+          [/(\s+|:\d{2}|:\d{2}\.\d{3})\-(\d{2}:?\d{2})\b/, '\1tzminus\2'],
           [/\b([ap])\.m\.?/, '\1m'],
           [/\./, ':'],
           [/['"]/, ''],
@@ -137,9 +139,9 @@ module Chronic
           [/\bsecond (of|day|month|hour|minute|second)\b/, '2nd \1']
         ],
         :pos_numerize => [
-          [/\-(\d{2}:?\d{2})\b/, 'tzminus\1'],
           [/([\/\-\,\@])/, ' \1 '],
           [/(?:^|\s)0(\d+:\d+\s*pm?\b)/, ' \1'],
+          # [/\-(\d{2}:?\d{2})\b/, 'tzminus\1'],
           [/\btoday\b/, 'this day'],
           [/\btomm?orr?ow\b/, 'next day'],
           [/\byesterday\b/, 'last day'],
@@ -176,7 +178,16 @@ module Chronic
         :at => /^(at|@)$/,
         :in => /^in$/,
         :on => /^on$/,
-        :and => /^and$/
+        :and => /^and$/,
+        :dot => /^\.$/,
+        :colon => /^:$/,
+        :space => /^ $/,
+        :slash => /^\/$/,
+        :dash => /^-$/,
+        :single_quote => /^'$/,
+        :double_quote => /^"$/,
+        :T => /^t$/,
+        :W => /^w$/ 
       }
     }
   end

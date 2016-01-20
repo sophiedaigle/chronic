@@ -447,9 +447,6 @@ class TestParsing < TestCase
 
     time = parse_now("today at 03:00:00", :hours24 => true)
     assert_equal Time.local(2006, 8, 16, 3), time
-
-    time = parse_now("tomorrow at 4a.m.")
-    assert_equal Time.local(2006, 8, 17, 4), time
   end
 
   def test_handle_r_g_r
@@ -1020,9 +1017,6 @@ class TestParsing < TestCase
     assert_equal nil, time
 
     time = parse_now("Ham Sandwich")
-    assert_equal nil, time
-
-    time = parse_now("t")
     assert_equal nil, time
   end
 

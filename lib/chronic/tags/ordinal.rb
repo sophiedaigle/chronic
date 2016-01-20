@@ -10,7 +10,7 @@ module Chronic
     # Returns an Array of tokens.
     def self.scan(tokens, options)
       tokens.each_index do |i|
-        if tokens[i].word =~ /^(\d+)(st|nd|rd|th|\.)$/
+        if tokens[i].word =~ Chronic.translate([:ordinal_regex])
             ordinal = $1.to_i
             tokens[i].tag(Ordinal.new(ordinal))
             tokens[i].tag(OrdinalDay.new(ordinal)) if Chronic::Date::could_be_day?(ordinal)
