@@ -1412,6 +1412,20 @@ class TestLocalesEnFr < TestCase
     assert_equal Time.local(2006, 12, 29, 12), time
   end
   
+  def test_french_sentences
+    time = parse_now('Envoye le payment à Rachel par mercredi')
+    assert_equal Time.local(2006, 8, 23, 12), time
+
+    time = parse_now('Crée une application dans 2 jours')
+    assert_equal Time.local(2006, 8, 18, 14), time
+
+    time = parse_now('Envoye la proposition dans 2 semaines à Dan')
+    assert_equal Time.local(2006, 8, 30, 14), time
+
+    time = parse_now('Mercredi envoye le payment à Rachel')
+    assert_equal Time.local(2006, 8, 23, 12), time
+  end
+  
   private
   def parse_now(string, options={})
     Chronic.parse(string, {:now => TIME_2006_08_16_14_00_00 }.merge(options))

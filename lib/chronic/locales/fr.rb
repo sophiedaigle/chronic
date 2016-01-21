@@ -60,8 +60,6 @@ module Chronic
                 ['dix-sept', '17'],
                 ['dix-huit', '18'],
                 ['dix-neuf', '19'],
-                [/\bun\b/, '1'],
-                [/\bune/, '1'],
                 ['deux', '2'],
                 ['trois', '3'],
                 ['quatre', '4'],
@@ -193,6 +191,7 @@ module Chronic
                 [/\b(\d{4}):(\d{2}):(\d{2})\b/, '\1 / \2 / \3'], # DTOriginal
                 [/\b0(\d+):(\d{2}):(\d{2}) ([ap]m)\b/, '\1:\2:\3 \4'],
                 [/\bpass[eé]e?s?\b/, 'avant'],
+                [/\bune? (ann[eé]e|ans|mois|semaine|jour(n[eé]e)?|heure|minute|seconde)\b/, '1 \1']
             ]
         },
 
@@ -206,7 +205,7 @@ module Chronic
             :comma => /^,$/,
             :in => /^dans|en$/,
             :and => /^et$/,
-            :at => /^[aà]$/,
+            :at => /^[aà] \d$/,
             :dot => /^\.$/,
             :colon => /^:$/,
             :space => /^ $/,
